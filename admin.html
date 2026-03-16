@@ -391,8 +391,19 @@
       </div>
 
       <div class="field">
-        <div class="field-label">HTML 로그</div>
-        <textarea id="html-input" placeholder="RISUAI에서 복사한 HTML을 여기에 붙여넣으세요..."></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="field-label">HTML 로그</div>
+          <label style="cursor:pointer;display:inline-flex;align-items:center;gap:6px;
+            font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;
+            color:var(--text-soft);border:1px solid var(--border);border-radius:6px;padding:4px 10px;
+            transition:all 0.2s;background:rgba(91,184,255,0.05)"
+            onmouseover="this.style.color='var(--text)';this.style.borderColor='rgba(91,184,255,0.3)'"
+            onmouseout="this.style.color='var(--text-soft)';this.style.borderColor='var(--border)'">
+            ↑ 파일로 올리기
+            <input type="file" accept=".html,.txt" onchange="loadHtmlFile(event)" style="display:none" />
+          </label>
+        </div>
+        <textarea id="html-input" placeholder="RISUAI에서 복사한 HTML을 여기에 붙여넣으세요...&#10;(용량이 크면 위의 '파일로 올리기'를 사용하세요)"></textarea>
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
           <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--accent);text-transform:uppercase;font-weight:300">정제 규칙</span>
           <span id="char-count" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-soft);font-weight:300">0 chars</span>
@@ -474,7 +485,15 @@
   document.addEventListener('DOMContentLoaded', () => {
     buildColorSwatches();
     document.getElementById('filename').addEventListener('input', updateFilepathPreview);
-    document.getElementById('html-input').addEventListener('input', updateCharCount);
+
+    // 붙여넣기는 paste 이벤트로 따로 처리 (대용량 대응)
+    const htmlInput = document.getElementById('html-input');
+    htmlInput.addEventListener('paste', () => {
+      // paste는 textarea 반영이 비동기라 requestAnimationFrame으로 처리
+      requestAnimationFrame(() => updateCharCount());
+    });
+    htmlInput.addEventListener('input', debounce(updateCharCount, 300));
+
     document.getElementById('new-char-color').addEventListener('input', e => {
       selectedColor = e.target.value; updateSwatchSelection();
     });
@@ -564,9 +583,27 @@
     if (!fn.endsWith('.html')) fn += '.html';
     document.getElementById('filepath-preview').textContent = `${FOLDER}/${fn}`;
   }
+  function debounce(fn, delay) {
+    let timer;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), delay); };
+  }
+
   function updateCharCount() {
     document.getElementById('char-count').textContent =
       `${document.getElementById('html-input').value.length.toLocaleString()} chars`;
+  }
+
+  function loadHtmlFile(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      document.getElementById('html-input').value = ev.target.result;
+      updateCharCount();
+    };
+    reader.readAsText(file, 'UTF-8');
+    // 같은 파일 다시 선택 가능하도록 초기화
+    e.target.value = '';
   }
 
   // ── 정제 규칙 관리 ──────────────────────────────────────────────
