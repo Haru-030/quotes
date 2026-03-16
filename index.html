@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📚 내 책 구절 모음</title>
+  <title>📚 Story Archive</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Shippori+Mincho:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -14,80 +14,34 @@
       --ink-soft: #aaa;
       --border: #d8d4ce;
       --accent: #3d6b8e;
-      --accent2: #7a9e7e;
       --rule: #e0dcd6;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       background: var(--bg);
-      background-image: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 27px,
-        var(--rule) 27px,
-        var(--rule) 28px
-      );
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 27px, var(--rule) 27px, var(--rule) 28px);
       color: var(--ink);
       font-family: 'Shippori Mincho', 'Noto Serif KR', serif;
       min-height: 100vh;
       padding: 0 1.2rem;
     }
-
     header {
       max-width: 640px;
       margin: 0 auto;
       padding: 4.5rem 0 2rem;
       border-bottom: 2px solid var(--ink);
-      background: transparent;
     }
-
     .header-top {
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
       margin-bottom: 1rem;
     }
-
-    .header-tag {
-      font-size: 0.68rem;
-      letter-spacing: 0.25em;
-      color: var(--accent);
-      text-transform: uppercase;
-    }
-
-    .header-date {
-      font-size: 0.68rem;
-      color: var(--ink-soft);
-      letter-spacing: 0.1em;
-    }
-
-    h1 {
-      font-family: 'Shippori Mincho', serif;
-      font-size: 2rem;
-      font-weight: 600;
-      color: var(--ink);
-      line-height: 1.4;
-      margin-bottom: 0.4rem;
-      letter-spacing: -0.02em;
-    }
-
-    .subtitle {
-      font-size: 0.82rem;
-      color: var(--ink-mid);
-      letter-spacing: 0.08em;
-    }
-
-    main {
-      max-width: 640px;
-      margin: 0 auto;
-      padding: 2.8rem 0 6rem;
-      display: flex;
-      flex-direction: column;
-      gap: 3.2rem;
-    }
-
+    .header-tag { font-size: 0.68rem; letter-spacing: 0.25em; color: var(--accent); text-transform: uppercase; }
+    .header-date { font-size: 0.68rem; color: var(--ink-soft); letter-spacing: 0.1em; }
+    h1 { font-family: 'Shippori Mincho', serif; font-size: 2rem; font-weight: 600; line-height: 1.4; margin-bottom: 0.4rem; letter-spacing: -0.02em; }
+    .subtitle { font-size: 0.82rem; color: var(--ink-mid); letter-spacing: 0.08em; }
+    main { max-width: 640px; margin: 0 auto; padding: 2.8rem 0 6rem; display: flex; flex-direction: column; gap: 3.2rem; }
     .character-section {
       background: var(--paper);
       border: 1px solid var(--border);
@@ -98,14 +52,7 @@
       animation: fadeUp 0.5s ease forwards;
       box-shadow: 0 1px 4px rgba(0,0,0,0.04), 2px 2px 0 var(--border);
     }
-
-    .character-section:nth-child(1) { animation-delay: 0.08s; }
-    .character-section:nth-child(2) { animation-delay: 0.18s; }
-    .character-section:nth-child(3) { animation-delay: 0.28s; }
-    .character-section:nth-child(n+4) { animation-delay: 0.38s; }
-
     @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
     .character-header {
       display: flex;
       align-items: center;
@@ -114,39 +61,13 @@
       background: var(--bg);
       border-bottom: 1px solid var(--border);
     }
-
-    .char-mark {
-      width: 3px;
-      height: 1.1rem;
-      background: var(--accent);
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-
-    .character-name {
-      font-size: 0.98rem;
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: 0.02em;
-    }
-
-    .character-desc {
-      font-size: 0.75rem;
-      color: var(--ink-mid);
-    }
-
-    .character-count {
-      margin-left: auto;
-      font-size: 0.65rem;
-      color: var(--ink-soft);
-      letter-spacing: 0.1em;
-    }
-
+    .char-mark { width: 3px; height: 1.1rem; border-radius: 2px; flex-shrink: 0; }
+    .character-name { font-size: 0.98rem; font-weight: 600; letter-spacing: 0.02em; }
+    .character-desc { font-size: 0.75rem; color: var(--ink-mid); }
+    .character-count { margin-left: auto; font-size: 0.65rem; color: var(--ink-soft); letter-spacing: 0.1em; }
     .quote-list { list-style: none; }
-
     .quote-item { border-bottom: 1px solid var(--rule); }
     .quote-item:last-child { border-bottom: none; }
-
     .quote-link {
       display: flex;
       align-items: center;
@@ -156,40 +77,16 @@
       color: inherit;
       transition: background 0.15s;
     }
-
     .quote-link:hover { background: #f5f3ef; }
     .quote-link:hover .quote-arrow { opacity: 1; transform: translateX(3px); color: var(--accent); }
-
-    .quote-num {
-      font-size: 0.65rem;
-      color: var(--ink-soft);
-      min-width: 1.4rem;
-      font-variant-numeric: tabular-nums;
-    }
-
+    .quote-num { font-size: 0.65rem; color: var(--ink-soft); min-width: 1.4rem; font-variant-numeric: tabular-nums; }
     .quote-info { flex: 1; }
-
-    .quote-title {
-      font-size: 0.9rem;
-      color: var(--ink);
-      margin-bottom: 0.15rem;
-      line-height: 1.5;
-      letter-spacing: 0.01em;
-    }
-
-    .quote-meta {
-      font-size: 0.72rem;
-      color: var(--ink-soft);
-      letter-spacing: 0.05em;
-    }
-
-    .quote-arrow {
-      font-size: 0.8rem;
-      opacity: 0;
-      color: var(--ink-soft);
-      transition: opacity 0.15s, transform 0.15s, color 0.15s;
-    }
-
+    .quote-title { font-size: 0.9rem; margin-bottom: 0.15rem; line-height: 1.5; }
+    .quote-meta { font-size: 0.72rem; color: var(--ink-soft); letter-spacing: 0.05em; }
+    .quote-arrow { font-size: 0.8rem; opacity: 0; color: var(--ink-soft); transition: opacity 0.15s, transform 0.15s, color 0.15s; }
+    .empty-msg { padding: 1rem 1.4rem; font-size: 0.82rem; color: var(--ink-soft); }
+    .loading { padding: 4rem 0; text-align: center; font-size: 0.8rem; color: var(--ink-soft); letter-spacing: 0.1em; }
+    .empty-state { padding: 3rem 1.4rem; text-align: center; font-size: 0.82rem; color: var(--ink-soft); line-height: 2; }
     footer {
       max-width: 640px;
       margin: 0 auto;
@@ -202,7 +99,6 @@
       color: var(--ink-soft);
       letter-spacing: 0.08em;
     }
-
     .admin-link {
       text-decoration: none;
       color: var(--ink-soft);
@@ -214,86 +110,81 @@
       border-radius: 2px;
       transition: color 0.2s, border-color 0.2s, background 0.2s;
     }
-
-    .admin-link:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-      background: rgba(61, 107, 142, 0.05);
-    }
+    .admin-link:hover { color: var(--accent); border-color: var(--accent); background: rgba(61,107,142,0.05); }
   </style>
 </head>
 <body>
   <header>
     <div class="header-top">
-      <span class="header-tag">My Reading Notes</span>
-      <span class="header-date">2026</span>
+      <span class="header-tag">Story Archive</span>
+      <span class="header-date" id="year"></span>
     </div>
-    <h1>내 책 구절 모음</h1>
-    <p class="subtitle">좋아서 남겨두고 싶었던 문장들</p>
+    <h1>Story Log</h1>
+    <p class="subtitle">기록된 모든 이야기들</p>
   </header>
 
-  <main>
-    <!-- ★ 캐릭터 A -->
-    <section class="character-section">
-      <div class="character-header">
-        <div class="char-mark"></div>
-        <span class="character-name">The Chronicles of Neo-Seoul</span>    <!-- ✏️ -->
-        <span class="character-desc">네오서울</span>       <!-- ✏️ -->
-        <span class="character-count">1 logs</span>         <!-- ✏️ -->
-      </div>
-      <ul class="quote-list">
-        <li class="quote-item">
-          <a class="quote-link" href="quotes/a-01.html">     <!-- ✏️ -->
-            <span class="quote-num">01</span>
-            <span class="quote-info">
-              <div class="quote-title">ChaeMin</div>       <!-- ✏️ -->
-              <div class="quote-meta">채민 · 1화</div>     <!-- ✏️ -->
-            </span>
-            <span class="quote-arrow">›</span>
-          </a>
-        </li>
-        <li class="quote-item">
-          <a class="quote-link" href="quotes/a-02.html">
-            <span class="quote-num">02</span>
-            <span class="quote-info">
-              <div class="quote-title">로그 제목</div>
-              <div class="quote-meta">작품명 · 2화</div>
-            </span>
-            <span class="quote-arrow">›</span>
-          </a>
-        </li>
-      </ul>
-    </section>
-
-    <!-- ★ 캐릭터 B -->
-    <section class="character-section">
-      <div class="character-header">
-        <div class="char-mark" style="background:var(--accent2)"></div>
-        <span class="character-name">캐릭터 이름 B</span>
-        <span class="character-desc">한 줄 설명</span>
-        <span class="character-count">1 log</span>
-      </div>
-      <ul class="quote-list">
-        <li class="quote-item">
-          <a class="quote-link" href="quotes/b-01.html">
-            <span class="quote-num">01</span>
-            <span class="quote-info">
-              <div class="quote-title">로그 제목</div>
-              <div class="quote-meta">작품명 · 1화</div>
-            </span>
-            <span class="quote-arrow">›</span>
-          </a>
-        </li>
-      </ul>
-    </section>
-
-    <!-- 여기에 캐릭터 섹션 복사해서 추가하세요 -->
+  <main id="main">
+    <div class="loading">불러오는 중...</div>
   </main>
 
   <footer>
-    <span>글자를 모으는 공간 · 나만의 서재</span>
+    <span>기록된 이야기들의 공간</span>
     <span>✦</span>
     <a class="admin-link" href="admin.html">+ 로그 추가</a>
   </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    const COLORS = ['#3d6b8e','#7a9e7e','#9b4a2a','#8e6b3d','#6b3d8e','#3d8e7a','#8e3d6b'];
+
+    async function loadData() {
+      const main = document.getElementById('main');
+      try {
+        const res = await fetch('data.json?t=' + Date.now());
+        if (!res.ok) throw new Error('data.json을 찾을 수 없어요');
+        const data = await res.json();
+
+        if (!data.characters || data.characters.length === 0) {
+          main.innerHTML = `<div class="empty-state">아직 저장된 로그가 없어요.<br>admin 페이지에서 첫 로그를 추가해보세요!</div>`;
+          return;
+        }
+
+        main.innerHTML = data.characters.map((char, ci) => {
+          const color = char.color || COLORS[ci % COLORS.length];
+          const logs = char.logs || [];
+          const rows = logs.map((log, li) => `
+            <li class="quote-item">
+              <a class="quote-link" href="quotes/${log.filename}">
+                <span class="quote-num">${String(li + 1).padStart(2, '0')}</span>
+                <span class="quote-info">
+                  <div class="quote-title">${log.title}</div>
+                  <div class="quote-meta">${log.meta || ''}</div>
+                </span>
+                <span class="quote-arrow">›</span>
+              </a>
+            </li>`).join('');
+
+          return `
+            <section class="character-section" style="animation-delay:${ci * 0.1 + 0.08}s">
+              <div class="character-header">
+                <div class="char-mark" style="background:${color}"></div>
+                <span class="character-name">${char.name}</span>
+                <span class="character-desc">&nbsp;${char.desc || ''}</span>
+                <span class="character-count">${logs.length} log${logs.length !== 1 ? 's' : ''}</span>
+              </div>
+              <ul class="quote-list">
+                ${rows.length ? rows : '<li class="empty-msg">아직 로그가 없어요.</li>'}
+              </ul>
+            </section>`;
+        }).join('');
+
+      } catch(e) {
+        main.innerHTML = `<div class="empty-state">오류가 발생했어요: ${e.message}</div>`;
+      }
+    }
+
+    loadData();
+  </script>
 </body>
 </html>
