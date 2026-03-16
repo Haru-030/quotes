@@ -5,225 +5,397 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Log Archive — Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300&family=Figtree:wght@300;400;500;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0a0a0f;
-      --surface: #111118;
-      --border: #2a2a3a;
-      --accent: #c8a96e;
-      --accent-dim: rgba(200,169,110,0.15);
-      --text: #e8e4dc;
-      --text-dim: #6b6878;
-      --red: #e05c5c;
-      --green: #5ce08a;
+      --bg:           #04091a;
+      --glass:        rgba(8, 24, 58, 0.55);
+      --glass-input:  rgba(4, 12, 35, 0.7);
+      --border:       rgba(80, 160, 255, 0.13);
+      --border-focus: rgba(80, 180, 255, 0.45);
+      --accent:       #5bb8ff;
+      --accent-dim:   rgba(91, 184, 255, 0.12);
+      --text:         #ddeeff;
+      --text-mid:     rgba(180, 210, 255, 0.6);
+      --text-soft:    rgba(140, 180, 240, 0.38);
+      --red:          #ff6b7a;
+      --red-dim:      rgba(255, 107, 122, 0.12);
+      --green:        #4ddbb0;
+      --green-dim:    rgba(77, 219, 176, 0.1);
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'Space Mono', monospace; min-height: 100vh; padding: 40px 20px; }
-    body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(200,169,110,0.06) 0%, transparent 70%); pointer-events: none; }
-    .container { max-width: 780px; margin: 0 auto; }
-    header { border-bottom: 1px solid var(--border); padding-bottom: 28px; margin-bottom: 40px; }
-    .header-label { font-size: 10px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
-    h1 { font-family: 'Noto Serif KR', serif; font-weight: 300; font-size: 28px; }
-    h1 span { color: var(--accent); }
-    .subtitle { font-size: 11px; color: var(--text-dim); margin-top: 8px; letter-spacing: 1px; }
+    html { scroll-behavior: smooth; }
 
-    #token-section { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 24px; margin-bottom: 32px; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Figtree', sans-serif;
+      font-weight: 400;
+      min-height: 100vh;
+      padding: 48px 20px 80px;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* ── 배경 오브 ── */
+    .bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .orb { position: absolute; border-radius: 50%; filter: blur(100px); animation: drift ease-in-out infinite; }
+    .orb-a { width:700px; height:700px; background:#062040; top:-200px; left:-200px; opacity:.7; animation-duration:26s; }
+    .orb-b { width:500px; height:500px; background:#0a2a50; bottom:0; right:-150px; opacity:.6; animation-duration:20s; animation-delay:-8s; }
+    .orb-c { width:420px; height:420px; background:#041a3a; top:45%; left:55%; opacity:.5; animation-duration:30s; animation-delay:-15s; }
+    .orb-d { width:300px; height:300px; background:#03122e; top:25%; left:20%; opacity:.55; animation-duration:22s; animation-delay:-4s; }
+    @keyframes drift {
+      0%,100% { transform: translate(0,0) scale(1); }
+      30%      { transform: translate(25px,-35px) scale(1.03); }
+      65%      { transform: translate(-18px,28px) scale(0.97); }
+    }
+    body::before {
+      content:''; position:fixed; inset:0; z-index:1; pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    }
+
+    /* ── 레이아웃 ── */
+    .container { max-width: 800px; margin: 0 auto; position: relative; z-index: 2; }
+
+    /* ── 헤더 ── */
+    header { padding-bottom: 36px; margin-bottom: 40px; border-bottom: 1px solid var(--border); }
+    .header-eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .eyebrow-line { width: 28px; height: 1px; background: linear-gradient(90deg, var(--accent), transparent); }
+    .eyebrow-text {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      letter-spacing: 0.28em; color: var(--accent); text-transform: uppercase; font-weight: 300;
+    }
+    h1 {
+      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      font-size: clamp(2rem, 5vw, 3rem); line-height: 1.2;
+    }
+    h1 em { font-style: italic; color: var(--accent); }
+    .subtitle {
+      font-family: 'DM Mono', monospace; font-size: 10.5px;
+      color: var(--text-soft); margin-top: 8px; letter-spacing: 0.1em; font-weight: 300;
+    }
+
+    /* ── 글래스 패널 ── */
+    .glass-panel {
+      background: var(--glass);
+      backdrop-filter: blur(24px) saturate(150%);
+      -webkit-backdrop-filter: blur(24px) saturate(150%);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      position: relative; overflow: hidden;
+    }
+    .glass-panel::before {
+      content:''; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
+      background: radial-gradient(ellipse 90% 50% at 50% -5%, rgba(91,184,255,0.07), transparent 65%);
+    }
+
+    /* ── 섹션 레이블 ── */
+    .section-label {
+      font-family: 'DM Mono', monospace; font-size: 9px;
+      letter-spacing: 0.3em; color: var(--accent); text-transform: uppercase;
+      font-weight: 300; margin-bottom: 16px;
+    }
+
+    /* ── 토큰 ── */
+    #token-section { padding: 24px; margin-bottom: 28px; }
     #token-section.hidden { display: none; }
-    .section-label { font-size: 9px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; }
-    .token-row { display: flex; gap: 10px; align-items: center; }
-    .token-status { font-size: 11px; color: var(--green); display: flex; align-items: center; gap: 8px; }
-    .token-status .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .token-row { display: flex; gap: 10px; align-items: stretch; }
+    .field-hint { font-size: 11px; color: var(--text-soft); margin-top: 8px; font-weight: 300; }
 
+    #token-ok { display: none; margin-bottom: 28px; }
+    #token-ok.visible { display: block; }
+    .token-status {
+      display: inline-flex; align-items: center; gap: 10px;
+      font-family: 'DM Mono', monospace; font-size: 11px; color: var(--green);
+      background: var(--green-dim); border: 1px solid rgba(77,219,176,0.2);
+      padding: 9px 16px; border-radius: 8px; font-weight: 300;
+    }
+    .token-status .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 8px var(--green); flex-shrink: 0;
+    }
+
+    /* ── 입력 요소 ── */
     input, textarea, select {
-      background: #0d0d14; border: 1px solid var(--border); color: var(--text);
-      font-family: 'Space Mono', monospace; font-size: 12px; padding: 10px 14px;
-      outline: none; transition: border-color 0.2s; width: 100%;
+      background: var(--glass-input); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Figtree', sans-serif;
+      font-size: 13.5px; font-weight: 400; padding: 11px 14px;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%; border-radius: 8px;
     }
-    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
-    select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b6878'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
-    select option { background: #0d0d14; }
-    textarea { resize: vertical; min-height: 180px; line-height: 1.5; }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+    input::placeholder, textarea::placeholder { color: var(--text-soft); }
+    select {
+      cursor: pointer; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235bb8ff' opacity='.5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px;
+    }
+    select option { background: #071020; color: var(--text); }
+    textarea { resize: vertical; min-height: 190px; line-height: 1.65; font-size: 13px; }
 
-    .form-section { display: flex; flex-direction: column; gap: 24px; }
-    .field { display: flex; flex-direction: column; gap: 8px; }
-    .field-label { font-size: 9px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; }
-    .field-hint { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
-    .row2 { display: flex; gap: 12px; }
-    .row2 > * { flex: 1; }
+    /* ── 폼 ── */
+    .form-section { display: flex; flex-direction: column; gap: 22px; }
+    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field-label {
+      font-family: 'DM Mono', monospace; font-size: 9.5px;
+      letter-spacing: 0.22em; color: var(--text-mid); text-transform: uppercase; font-weight: 300;
+    }
+    .row2 { display: flex; gap: 14px; }
+    .row2 > * { flex: 1; min-width: 0; }
 
-    #new-char-fields { display: none; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 20px; flex-direction: column; gap: 16px; }
+    #new-char-fields { display: none; padding: 20px; flex-direction: column; gap: 16px; }
     #new-char-fields.visible { display: flex; }
-    .color-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
-    .color-swatch { width: 24px; height: 24px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s, transform 0.15s; }
-    .color-swatch:hover { transform: scale(1.15); }
-    .color-swatch.selected { border-color: var(--text); }
+    .color-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+    .color-swatch {
+      width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+    .color-swatch:hover { transform: scale(1.18); }
+    .color-swatch.selected { border-color: rgba(255,255,255,0.8); box-shadow: 0 0 10px rgba(255,255,255,0.25); }
 
-    button { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; border: none; cursor: pointer; padding: 10px 20px; transition: all 0.2s; }
-    .btn-primary { background: var(--accent); color: #0a0a0f; font-weight: 700; }
-    .btn-primary:hover { background: #dfc080; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(200,169,110,0.3); }
-    .btn-primary:disabled { background: var(--border); color: var(--text-dim); transform: none; box-shadow: none; cursor: not-allowed; }
-    .btn-secondary { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
-    .btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
-    .btn-small { padding: 8px 14px; font-size: 10px; }
-
-    /* ── 삭제 버튼 ── */
+    /* ── 버튼 ── */
+    button {
+      font-family: 'DM Mono', monospace; font-size: 10.5px;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      border: none; cursor: pointer; padding: 11px 22px;
+      transition: all 0.2s; border-radius: 8px; font-weight: 400;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #3a9fe8, #5bb8ff);
+      color: #03091c; font-weight: 600;
+      box-shadow: 0 2px 16px rgba(91,184,255,0.25);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #4cb0f5, #7acfff);
+      transform: translateY(-1px); box-shadow: 0 6px 24px rgba(91,184,255,0.35);
+    }
+    .btn-primary:disabled {
+      background: rgba(80,120,180,0.2); color: var(--text-soft);
+      transform: none; box-shadow: none; cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: rgba(91,184,255,0.07); color: var(--text-mid);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: rgba(91,184,255,0.13); border-color: rgba(91,184,255,0.3); color: var(--text);
+    }
+    .btn-small { padding: 8px 14px; font-size: 9.5px; }
     .btn-danger {
-      background: transparent;
-      color: var(--red);
-      border: 1px solid rgba(224,92,92,0.3);
-      font-size: 9px;
-      padding: 4px 10px;
-      letter-spacing: 1px;
+      background: transparent; color: var(--red);
+      border: 1px solid rgba(255,107,122,0.25);
+      font-size: 9px; padding: 5px 11px; letter-spacing: 0.12em;
     }
-    .btn-danger:hover {
-      background: rgba(224,92,92,0.1);
-      border-color: var(--red);
-      color: var(--red);
-    }
-    .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-danger:hover { background: var(--red-dim); border-color: rgba(255,107,122,0.5); }
+    .btn-danger:disabled { opacity: 0.35; cursor: not-allowed; }
 
+    /* ── 미리보기 ── */
     #preview-wrap { display: none; margin-top: 8px; }
     #preview-wrap.visible { display: block; }
-    #preview-frame { width: 100%; height: 400px; border: 1px solid var(--border); background: #fff; }
+    #preview-frame { width: 100%; height: 400px; border: 1px solid var(--border); border-radius: 8px; background: #fff; }
 
-    #status { display: none; padding: 14px 18px; font-size: 11px; letter-spacing: 1px; border-left: 3px solid; margin-top: 16px; white-space: pre-line; line-height: 2; }
-    #status.success { display: block; background: rgba(92,224,138,0.08); border-color: var(--green); color: var(--green); }
-    #status.error { display: block; background: rgba(224,92,92,0.08); border-color: var(--red); color: var(--red); }
-    #status.loading { display: block; background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    /* ── 상태 ── */
+    #status {
+      display: none; padding: 13px 18px; font-size: 12px; letter-spacing: 0.05em;
+      border-left: 2px solid; border-radius: 0 8px 8px 0;
+      margin-top: 16px; line-height: 2;
+      font-family: 'DM Mono', monospace; font-weight: 300;
+    }
+    #status.success { display:block; background:var(--green-dim); border-color:var(--green); color:var(--green); }
+    #status.error   { display:block; background:var(--red-dim);   border-color:var(--red);   color:var(--red); }
+    #status.loading { display:block; background:var(--accent-dim); border-color:var(--accent); color:var(--accent); }
 
-    .submit-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    .divider { border: none; border-top: 1px solid var(--border); margin: 48px 0; }
+    .submit-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
 
-    .list-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-    .file-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(42,42,58,0.5); font-size: 11px; gap: 12px; flex-wrap: wrap; }
-    .file-char { font-size: 9px; letter-spacing: 1px; padding: 2px 8px; border-radius: 10px; color: #0a0a0f; font-weight: 700; white-space: nowrap; }
-    .file-name { color: var(--accent); text-decoration: none; letter-spacing: 0.5px; flex: 1; min-width: 120px; }
-    .file-name:hover { text-decoration: underline; }
+    /* ── 구분선 ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 44px 0; position: relative; }
+    .divider::after {
+      content:'✦'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      background:var(--bg); color:var(--text-soft); font-size:9px; padding:0 10px;
+    }
+
+    /* ── 파일 목록 ── */
+    .list-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 14px;
+    }
+    .file-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 11px 0; border-bottom: 1px solid rgba(80,160,255,0.07);
+      font-size: 12px; gap: 12px; flex-wrap: wrap;
+    }
+    .file-item:last-child { border-bottom: none; }
+    .file-char {
+      font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 0.1em;
+      padding: 2px 9px; border-radius: 20px; color: #03091c; font-weight: 600; white-space: nowrap;
+    }
+    .file-name {
+      color: var(--accent); text-decoration: none;
+      font-family: 'DM Mono', monospace; font-size: 11.5px;
+      letter-spacing: 0.03em; flex: 1; min-width: 120px; font-weight: 300;
+    }
+    .file-name:hover { text-decoration: underline; text-underline-offset: 3px; }
     .file-actions { display: flex; gap: 8px; }
-    .copy-btn { font-size: 9px; padding: 4px 10px; letter-spacing: 1px; }
 
     @keyframes spin { to { transform: rotate(360deg); } }
-    .spinner { display: inline-block; width: 10px; height: 10px; border: 1px solid var(--accent); border-top-color: transparent; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px; }
+    .spinner {
+      display: inline-block; width: 10px; height: 10px;
+      border: 1.5px solid var(--accent); border-top-color: transparent;
+      border-radius: 50%; animation: spin 0.7s linear infinite;
+      margin-right: 8px; vertical-align: middle;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(91,184,255,0.15); border-radius: 4px; }
   </style>
 </head>
 <body>
-<div class="container">
 
-  <header>
-    <div class="header-label">Story Archive / Admin</div>
-    <h1>Log <span>Upload</span></h1>
-    <div class="subtitle">RISUAI 로그를 GitHub에 직접 저장 · index 자동 업데이트</div>
-  </header>
-
-  <!-- TOKEN -->
-  <div id="token-section">
-    <div class="section-label">GitHub Token 설정</div>
-    <div class="token-row">
-      <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx" style="flex:1" />
-      <button class="btn-primary btn-small" onclick="saveToken()">저장</button>
-    </div>
-    <div class="field-hint" style="margin-top:10px">토큰은 이 브라우저에만 저장되며 외부로 전송되지 않아요.</div>
-  </div>
-  <div id="token-ok" class="hidden" style="margin-bottom:32px">
-    <div class="token-status">
-      <span class="dot"></span><span>Token 연결됨</span>
-      <button class="btn-secondary btn-small" onclick="clearToken()" style="margin-left:8px">변경</button>
-    </div>
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+    <div class="orb orb-d"></div>
   </div>
 
-  <hr class="divider" style="margin:28px 0 36px">
+  <div class="container">
 
-  <div class="form-section">
+    <header>
+      <div class="header-eyebrow">
+        <div class="eyebrow-line"></div>
+        <span class="eyebrow-text">Story Archive / Admin</span>
+      </div>
+      <h1>Log <em>Upload</em></h1>
+      <p class="subtitle">RISUAI 로그를 GitHub에 직접 저장 · index 자동 업데이트</p>
+    </header>
 
-    <!-- 캐릭터 -->
-    <div class="field">
-      <div class="field-label">캐릭터</div>
-      <select id="char-select" onchange="onCharChange()">
-        <option value="">-- 선택하세요 --</option>
-        <option value="__new__">+ 새 캐릭터 추가</option>
-      </select>
+    <!-- 토큰 -->
+    <div id="token-section" class="glass-panel">
+      <div class="section-label">GitHub Token</div>
+      <div class="token-row">
+        <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+          style="flex:1;border-radius:8px 0 0 8px" />
+        <button class="btn-primary btn-small" onclick="saveToken()"
+          style="border-radius:0 8px 8px 0;white-space:nowrap">저장</button>
+      </div>
+      <p class="field-hint" style="margin-top:10px">토큰은 이 브라우저에만 저장되며 외부로 전송되지 않아요.</p>
+    </div>
+    <div id="token-ok">
+      <div class="token-status">
+        <span class="dot"></span>
+        <span>Token 연결됨</span>
+        <button class="btn-secondary btn-small" onclick="clearToken()" style="margin-left:6px">변경</button>
+      </div>
     </div>
 
-    <!-- 새 캐릭터 -->
-    <div id="new-char-fields">
-      <div class="section-label" style="margin-bottom:0">새 캐릭터 정보</div>
+    <div class="divider"></div>
+
+    <!-- 업로드 폼 -->
+    <div class="form-section">
+
+      <div class="field">
+        <div class="field-label">캐릭터</div>
+        <select id="char-select" onchange="onCharChange()">
+          <option value="">-- 선택하세요 --</option>
+          <option value="__new__">+ 새 캐릭터 추가</option>
+        </select>
+      </div>
+
+      <div id="new-char-fields" class="glass-panel">
+        <div class="section-label" style="margin-bottom:4px">새 캐릭터 정보</div>
+        <div class="row2">
+          <div class="field">
+            <div class="field-label">캐릭터 이름</div>
+            <input type="text" id="new-char-name" placeholder="예: The Chronicles of Neo-Seoul" />
+          </div>
+          <div class="field">
+            <div class="field-label">부제 (선택)</div>
+            <input type="text" id="new-char-desc" placeholder="예: 네오서울" />
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label">색상</div>
+          <div class="color-row" id="color-row"></div>
+          <input type="text" id="new-char-color" placeholder="#3d6b8e" style="margin-top:8px;width:150px" />
+        </div>
+      </div>
+
       <div class="row2">
         <div class="field">
-          <div class="field-label">캐릭터 이름</div>
-          <input type="text" id="new-char-name" placeholder="예: The Chronicles of Neo-Seoul" />
+          <div class="field-label">로그 제목</div>
+          <input type="text" id="log-title" />
         </div>
         <div class="field">
-          <div class="field-label">부제 (선택)</div>
-          <input type="text" id="new-char-desc" placeholder="예: 네오서울" />
+          <div class="field-label">메타 정보 (선택)</div>
+          <input type="text" id="log-meta"  />
         </div>
       </div>
+
       <div class="field">
-        <div class="field-label">색상</div>
-        <div class="color-row" id="color-row"></div>
-        <input type="text" id="new-char-color" placeholder="#3d6b8e" style="margin-top:8px;width:140px" />
+        <div class="field-label">파일 이름</div>
+        <div style="display:flex;gap:8px">
+          <input type="text" id="filename" placeholder="예: neo-seoul-01.html"
+            style="flex:1;border-radius:8px 0 0 8px" />
+          <button class="btn-secondary btn-small" onclick="autoFilename()"
+            style="border-radius:0 8px 8px 0;white-space:nowrap">자동 생성</button>
+        </div>
+        <p class="field-hint">저장 경로:
+          <span id="filepath-preview"
+            style="color:var(--accent);font-family:'DM Mono',monospace;font-size:11px">quotes/파일명.html</span>
+        </p>
       </div>
-    </div>
 
-    <!-- 로그 정보 -->
-    <div class="row2">
       <div class="field">
-        <div class="field-label">로그 제목</div>
-        <input type="text" id="log-title" placeholder="예: ChaeMin" />
+        <div class="field-label">HTML 로그</div>
+        <textarea id="html-input" placeholder="RISUAI에서 복사한 HTML을 여기에 붙여넣으세요..."></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:7px">
+          <button class="btn-secondary btn-small" onclick="sanitizeHtml()">✦ 정제하기</button>
+          <span id="char-count"
+            style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-soft);font-weight:300">0 chars</span>
+        </div>
+        <div id="sanitize-result"
+          style="display:none;font-size:11px;color:var(--green);margin-top:5px;font-family:'DM Mono',monospace;font-weight:300"></div>
       </div>
+
       <div class="field">
-        <div class="field-label">메타 정보 (선택)</div>
-        <input type="text" id="log-meta" placeholder="예: 채민 · 1화" />
+        <button class="btn-secondary btn-small" onclick="togglePreview()" style="align-self:flex-start">미리보기 열기</button>
+        <div id="preview-wrap"><iframe id="preview-frame" sandbox="allow-scripts"></iframe></div>
+      </div>
+
+      <div class="submit-row">
+        <button class="btn-primary" id="save-btn" onclick="saveAll()">저장 + 목록 자동 업데이트</button>
+        <button class="btn-secondary" onclick="clearForm()">초기화</button>
+      </div>
+      <div id="status"></div>
+    </div>
+
+    <!-- 파일 목록 -->
+    <div id="saved-list" style="margin-top:48px">
+      <div class="divider"></div>
+      <div class="list-header">
+        <div class="section-label" style="margin-bottom:0">저장된 로그</div>
+        <button class="btn-secondary btn-small" onclick="loadAll()">새로고침</button>
+      </div>
+      <div id="file-list-content">
+        <p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-soft);font-weight:300">
+          토큰을 설정하면 파일 목록이 표시됩니다.
+        </p>
       </div>
     </div>
 
-    <!-- 파일명 -->
-    <div class="field">
-      <div class="field-label">파일 이름</div>
-      <div style="display:flex;gap:10px">
-        <input type="text" id="filename" placeholder="예: neo-seoul-01.html" style="flex:1" />
-        <button class="btn-secondary btn-small" onclick="autoFilename()">자동 생성</button>
-      </div>
-      <div class="field-hint">저장 경로: <span id="filepath-preview" style="color:var(--accent)">quotes/파일명.html</span></div>
-    </div>
-
-    <!-- HTML -->
-    <div class="field">
-      <div class="field-label">HTML 로그 붙여넣기</div>
-      <textarea id="html-input" placeholder="RISUAI에서 복사한 HTML을 여기에 붙여넣으세요..."></textarea>
-      <div class="field-hint" id="char-count" style="text-align:right">0 chars</div>
-    </div>
-
-    <!-- 미리보기 -->
-    <div class="field">
-      <button class="btn-secondary btn-small" onclick="togglePreview()" style="align-self:flex-start">미리보기 열기</button>
-      <div id="preview-wrap"><iframe id="preview-frame" sandbox="allow-scripts"></iframe></div>
-    </div>
-
-    <div class="submit-row">
-      <button class="btn-primary" id="save-btn" onclick="saveAll()">저장 + 목록 자동 업데이트</button>
-      <button class="btn-secondary" onclick="clearForm()">초기화</button>
-    </div>
-    <div id="status"></div>
   </div>
 
-  <div id="saved-list" style="margin-top:48px">
-    <hr class="divider" style="margin-top:0">
-    <div class="list-header">
-      <div class="section-label" style="margin-bottom:0">저장된 로그</div>
-      <button class="btn-secondary btn-small" onclick="loadAll()">새로고침</button>
-    </div>
-    <div id="file-list-content">
-      <div style="font-size:11px;color:var(--text-dim)">토큰을 설정하면 파일 목록이 표시됩니다.</div>
-    </div>
-  </div>
-
-</div>
 <script>
-  const REPO = 'Haru-030/quotes';
+  const REPO   = 'Haru-030/quotes';
   const FOLDER = 'quotes';
   const COLORS = ['#3d6b8e','#7a9e7e','#9b4a2a','#8e6b3d','#6b3d8e','#3d8e7a','#8e3d6b','#c8a96e'];
-  let currentData = { characters: [] };
+  let currentData   = { characters: [] };
   let selectedColor = COLORS[0];
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -248,7 +420,9 @@
     updateSwatchSelection();
   }
   function updateSwatchSelection() {
-    document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('selected', s.title === selectedColor));
+    document.querySelectorAll('.color-swatch').forEach(s =>
+      s.classList.toggle('selected', s.title === selectedColor)
+    );
   }
 
   function getToken() { return localStorage.getItem('gh_token'); }
@@ -261,12 +435,12 @@
   function clearToken() {
     localStorage.removeItem('gh_token');
     document.getElementById('token-section').classList.remove('hidden');
-    document.getElementById('token-ok').classList.add('hidden');
+    document.getElementById('token-ok').classList.remove('visible');
     document.getElementById('token-input').value = '';
   }
   function showTokenStatus() {
     document.getElementById('token-section').classList.add('hidden');
-    document.getElementById('token-ok').classList.remove('hidden');
+    document.getElementById('token-ok').classList.add('visible');
   }
 
   async function loadAll() {
@@ -290,21 +464,23 @@
   }
 
   function populateCharSelect() {
-    const sel = document.getElementById('char-select');
+    const sel  = document.getElementById('char-select');
     const prev = sel.value;
-    sel.innerHTML = '<option value="">-- 선택하세요 --</option>' +
+    sel.innerHTML =
+      '<option value="">-- 선택하세요 --</option>' +
       currentData.characters.map(c => `<option value="${c.id}">${c.name}</option>`).join('') +
       '<option value="__new__">+ 새 캐릭터 추가</option>';
     if (prev) sel.value = prev;
   }
 
   function onCharChange() {
-    document.getElementById('new-char-fields').classList.toggle('visible',
-      document.getElementById('char-select').value === '__new__');
+    document.getElementById('new-char-fields').classList.toggle(
+      'visible', document.getElementById('char-select').value === '__new__'
+    );
   }
 
   function autoFilename() {
-    const now = new Date();
+    const now   = new Date();
     const stamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
     document.getElementById('filename').value = `log-${stamp}.html`;
     updateFilepathPreview();
@@ -315,8 +491,34 @@
     document.getElementById('filepath-preview').textContent = `${FOLDER}/${fn}`;
   }
   function updateCharCount() {
-    document.getElementById('char-count').textContent = `${document.getElementById('html-input').value.length.toLocaleString()} chars`;
+    document.getElementById('char-count').textContent =
+      `${document.getElementById('html-input').value.length.toLocaleString()} chars`;
   }
+
+  // ── HTML 정제 ─────────────────────────────────────────────────
+  function sanitizeHtml() {
+    const ta     = document.getElementById('html-input');
+    const result = document.getElementById('sanitize-result');
+    const before = ta.value;
+    if (!before.trim()) { result.style.display = 'none'; return; }
+
+    let text = before, removed = [];
+    const lbCount = (text.match(/\[LBDATA START\][\s\S]*?\[LBDATA END\]/g) || []).length;
+    if (lbCount > 0) {
+      text = text.replace(/\[LBDATA START\][\s\S]*?\[LBDATA END\]/g, '');
+      removed.push(`LBDATA 블록 ${lbCount}개`);
+    }
+    text = text.replace(/\n{3,}/g, '\n\n').trim();
+    ta.value = text;
+    updateCharCount();
+
+    result.style.color = removed.length ? 'var(--green)' : 'var(--text-soft)';
+    result.textContent = removed.length
+      ? `✓ 제거됨: ${removed.join(' · ')}`
+      : '정제할 항목이 없어요.';
+    result.style.display = 'block';
+  }
+  // ─────────────────────────────────────────────────────────────
 
   let previewOpen = false;
   function togglePreview() {
@@ -329,8 +531,7 @@
     const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
       headers: { Authorization: `Bearer ${getToken()}`, Accept: 'application/vnd.github+json' }
     });
-    if (res.ok) { return (await res.json()).sha; }
-    return null;
+    return res.ok ? (await res.json()).sha : null;
   }
 
   async function putFile(path, content, message, sha) {
@@ -338,14 +539,17 @@
     if (sha) body.sha = sha;
     const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
       method: 'PUT',
-      headers: { Authorization: `Bearer ${getToken()}`, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify(body)
     });
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || `HTTP ${res.status}`); }
     return res.json();
   }
 
-  // ── 파일 삭제 (GitHub API) ──────────────────────────────────────
   async function deleteFile(path, sha, message) {
     const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
       method: 'DELETE',
@@ -359,44 +563,31 @@
     if (!res.ok) { const e = await res.json(); throw new Error(e.message || `HTTP ${res.status}`); }
   }
 
-  // ── 로그 삭제 메인 함수 ─────────────────────────────────────────
   async function deleteLog(filename) {
     if (!confirm(`"${filename}" 을 삭제할까요?\n이 작업은 되돌릴 수 없어요.`)) return;
-
-    // 해당 버튼 비활성화
     const btn = document.querySelector(`[data-delete="${filename}"]`);
     if (btn) { btn.disabled = true; btn.textContent = '삭제 중...'; }
-
     setStatus('loading', '<span class="spinner"></span>(1/2) 파일 삭제 중...');
-
     try {
-      // 1) quotes/파일.html 삭제
       const logPath = `${FOLDER}/${filename}`;
       const fileSha = await getFileSha(logPath);
       if (!fileSha) throw new Error(`파일을 찾을 수 없어요: ${logPath}`);
       await deleteFile(logPath, fileSha, `Delete log: ${filename}`);
-
       setStatus('loading', '<span class="spinner"></span>(2/2) data.json 업데이트 중...');
-
-      // 2) data.json에서 해당 로그 항목 제거
-      await loadDataJson(); // 최신 SHA 확보를 위해 재로드
+      await loadDataJson();
       currentData.characters.forEach(c => {
         c.logs = (c.logs || []).filter(l => l.filename !== filename);
       });
-
       const dataSha = await getFileSha('data.json');
       await putFile('data.json', JSON.stringify(currentData, null, 2), `Remove log from index: ${filename}`, dataSha);
-
       setStatus('success', `✓ "${filename}" 삭제 완료!`);
       populateCharSelect();
       await renderFileList();
-
     } catch(e) {
       setStatus('error', `삭제 실패: ${e.message}`);
       if (btn) { btn.disabled = false; btn.textContent = '삭제'; }
     }
   }
-  // ───────────────────────────────────────────────────────────────
 
   async function saveAll() {
     if (!getToken()) { setStatus('error', '먼저 GitHub Token을 설정해주세요.'); return; }
@@ -409,51 +600,42 @@
     if (!filename.endsWith('.html')) filename += '.html';
     const html = document.getElementById('html-input').value.trim();
     if (!html) { setStatus('error', 'HTML 내용을 붙여넣어주세요.'); return; }
-
     const logMeta = document.getElementById('log-meta').value.trim();
     const btn = document.getElementById('save-btn');
     btn.disabled = true;
     setStatus('loading', '<span class="spinner"></span>(1/2) 로그 파일 저장 중...');
-
     try {
       const logPath = `${FOLDER}/${filename}`;
       await putFile(logPath, html, `Add log: ${filename}`, await getFileSha(logPath));
-
       setStatus('loading', '<span class="spinner"></span>(2/2) 목록(data.json) 업데이트 중...');
-
       let char;
       if (charVal === '__new__') {
         const newName = document.getElementById('new-char-name').value.trim();
         if (!newName) throw new Error('새 캐릭터 이름을 입력해주세요.');
         const newId = newName.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
         char = {
-          id: newId,
-          name: newName,
-          desc: document.getElementById('new-char-desc').value.trim(),
+          id: newId, name: newName,
+          desc:  document.getElementById('new-char-desc').value.trim(),
           color: document.getElementById('new-char-color').value.trim() || selectedColor,
-          logs: []
+          logs:  []
         };
         currentData.characters.push(char);
       } else {
         char = currentData.characters.find(c => c.id === charVal);
         if (!char) throw new Error('캐릭터를 찾을 수 없어요.');
       }
-
       char.logs.push({ filename, title: logTitle, meta: logMeta, date: new Date().toISOString().slice(0,10) });
-
       const dataSha = await getFileSha('data.json');
       await putFile('data.json', JSON.stringify(currentData, null, 2), `Update index: add ${filename}`, dataSha);
-
       const pageUrl = `https://haru-030.github.io/quotes/${FOLDER}/${filename}`;
       setStatus('success',
         `✓ 저장 완료! index도 자동 업데이트됐어요.\n` +
         `<a href="${pageUrl}" target="_blank" style="color:var(--green)">→ Pages URL 열기</a>\n` +
-        `<span style="font-size:10px;color:var(--text-dim);user-select:all">${pageUrl}</span>`
+        `<span style="font-size:10px;color:var(--text-soft);user-select:all;font-family:'DM Mono',monospace">${pageUrl}</span>`
       );
       populateCharSelect();
       document.getElementById('char-select').value = char.id;
       await renderFileList();
-
     } catch(e) {
       setStatus('error', `오류: ${e.message}`);
     } finally {
@@ -464,33 +646,36 @@
   async function renderFileList() {
     const token = getToken(); if (!token) return;
     const container = document.getElementById('file-list-content');
-    container.innerHTML = '<div style="font-size:11px;color:var(--text-dim)">불러오는 중...</div>';
+    container.innerHTML = `<p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-soft);font-weight:300">불러오는 중...</p>`;
     try {
       const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${FOLDER}`, {
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/vnd.github+json' }
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const files = (await res.json()).filter(f => f.name.endsWith('.html')).reverse();
-      if (!files.length) { container.innerHTML = '<div style="font-size:11px;color:var(--text-dim)">아직 저장된 파일이 없어요.</div>'; return; }
-
+      if (!files.length) {
+        container.innerHTML = `<p style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-soft);font-weight:300">아직 저장된 파일이 없어요.</p>`;
+        return;
+      }
       const fileCharMap = {};
       currentData.characters.forEach(c => (c.logs||[]).forEach(l => { fileCharMap[l.filename] = c; }));
-
       container.innerHTML = files.map(f => {
         const pageUrl = `https://haru-030.github.io/quotes/${FOLDER}/${f.name}`;
         const c = fileCharMap[f.name];
-        const badge = c ? `<span class="file-char" style="background:${c.color}">${c.name.slice(0,14)}${c.name.length>14?'…':''}</span>` : '';
+        const badge = c
+          ? `<span class="file-char" style="background:${c.color}">${c.name.slice(0,14)}${c.name.length>14?'…':''}</span>`
+          : '';
         return `<div class="file-item">
           ${badge}
           <a class="file-name" href="${f.html_url}" target="_blank">${f.name}</a>
           <div class="file-actions">
-            <button class="btn-secondary copy-btn" onclick="copyUrl('${pageUrl}')">URL 복사</button>
+            <button class="btn-secondary btn-small" onclick="copyUrl('${pageUrl}')">URL 복사</button>
             <button class="btn-danger btn-small" data-delete="${f.name}" onclick="deleteLog('${f.name}')">삭제</button>
           </div>
         </div>`;
       }).join('');
     } catch(e) {
-      container.innerHTML = `<div style="font-size:11px;color:var(--red)">오류: ${e.message}</div>`;
+      container.innerHTML = `<p style="font-size:11px;color:var(--red)">${e.message}</p>`;
     }
   }
 
@@ -503,6 +688,7 @@
     document.getElementById('char-select').value = '';
     document.getElementById('new-char-fields').classList.remove('visible');
     document.getElementById('status').style.display = 'none';
+    document.getElementById('sanitize-result').style.display = 'none';
     updateCharCount(); autoFilename();
   }
 
