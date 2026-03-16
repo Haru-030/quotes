@@ -194,6 +194,45 @@
     .btn-danger:hover { background: var(--red-dim); border-color: rgba(255,107,122,0.5); }
     .btn-danger:disabled { opacity: 0.35; cursor: not-allowed; }
 
+    /* ── 정제 규칙 패널 ── */
+    .rules-panel { padding: 18px 20px; }
+    .rules-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .rule-item {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(4,12,35,0.5); border: 1px solid var(--border);
+      border-radius: 8px; padding: 9px 12px; transition: border-color 0.2s;
+    }
+    .rule-item.disabled { opacity: 0.42; }
+    .rule-item:hover { border-color: rgba(91,184,255,0.25); }
+    .rule-toggle {
+      width: 32px; height: 18px; border-radius: 9px; border: none; cursor: pointer;
+      position: relative; flex-shrink: 0; transition: background 0.2s; padding: 0;
+    }
+    .rule-toggle.on  { background: var(--accent); }
+    .rule-toggle.off { background: rgba(255,255,255,0.12); }
+    .rule-toggle::after {
+      content:''; position:absolute; top:3px; width:12px; height:12px;
+      border-radius:50%; background:#fff; transition: left 0.2s;
+    }
+    .rule-toggle.on::after  { left: 17px; }
+    .rule-toggle.off::after { left: 3px; }
+    .rule-name {
+      font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 0.04em;
+      color: var(--text); font-weight: 300; flex: 0 0 130px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .rule-pattern {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      color: var(--text-soft); flex: 1; min-width: 0;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .rule-add-form {
+      display: none; flex-direction: column; gap: 9px;
+      background: rgba(4,12,35,0.5); border: 1px dashed rgba(91,184,255,0.2);
+      border-radius: 8px; padding: 14px; margin-top: 4px;
+    }
+    .rule-add-form.visible { display: flex; }
+
     /* ── 미리보기 ── */
     #preview-wrap { display: none; margin-top: 8px; }
     #preview-wrap.visible { display: block; }
@@ -329,11 +368,11 @@
       <div class="row2">
         <div class="field">
           <div class="field-label">로그 제목</div>
-          <input type="text" id="log-title" />
+          <input type="text" id="log-title" placeholder="예: ChaeMin" />
         </div>
         <div class="field">
           <div class="field-label">메타 정보 (선택)</div>
-          <input type="text" id="log-meta"  />
+          <input type="text" id="log-meta" placeholder="예: 채민 · 1화" />
         </div>
       </div>
 
@@ -354,13 +393,47 @@
       <div class="field">
         <div class="field-label">HTML 로그</div>
         <textarea id="html-input" placeholder="RISUAI에서 복사한 HTML을 여기에 붙여넣으세요..."></textarea>
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:7px">
-          <button class="btn-secondary btn-small" onclick="sanitizeHtml()">✦ 정제하기</button>
-          <span id="char-count"
-            style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-soft);font-weight:300">0 chars</span>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--accent);text-transform:uppercase;font-weight:300">정제 규칙</span>
+          <span id="char-count" style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-soft);font-weight:300">0 chars</span>
         </div>
+
+        <!-- 규칙 패널 -->
+        <div class="glass-panel rules-panel" style="margin-top:8px">
+          <div id="rules-list" class="rules-list">
+            <!-- JS로 렌더링 -->
+          </div>
+          <div id="rule-add-form" class="rule-add-form">
+            <div class="field">
+              <div class="field-label" style="font-size:8.5px">규칙 이름</div>
+              <input type="text" id="new-rule-name" placeholder="예: LBDATA 블록" style="font-size:12px;padding:8px 11px" />
+            </div>
+            <div class="field">
+              <div class="field-label" style="font-size:8.5px;color:var(--accent)">In &nbsp;— 찾을 패턴 (정규식)</div>
+              <input type="text" id="new-rule-pattern"
+                placeholder="예: \[LBDATA START\][\s\S]*?\[LBDATA END\]"
+                style="font-size:11px;padding:8px 11px;border-color:rgba(91,184,255,0.2)" />
+            </div>
+            <div class="field">
+              <div class="field-label" style="font-size:8.5px;color:var(--green)">Out — 바꿀 텍스트 (비우면 삭제)</div>
+              <input type="text" id="new-rule-replacement"
+                placeholder="예: [정제됨]  or  비워두면 해당 부분 삭제"
+                style="font-size:11px;padding:8px 11px;border-color:rgba(77,219,176,0.2)" />
+            </div>
+            <div id="rule-pattern-error" style="display:none;font-size:10px;color:var(--red);font-family:'DM Mono',monospace"></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-primary btn-small" onclick="saveNewRule()">추가</button>
+              <button class="btn-secondary btn-small" onclick="toggleAddForm()">취소</button>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+            <button class="btn-secondary btn-small" onclick="toggleAddForm()">+ 규칙 추가</button>
+            <button class="btn-primary btn-small" onclick="sanitizeHtml()">✦ 정제하기</button>
+          </div>
+        </div>
+
         <div id="sanitize-result"
-          style="display:none;font-size:11px;color:var(--green);margin-top:5px;font-family:'DM Mono',monospace;font-weight:300"></div>
+          style="display:none;font-size:11px;color:var(--green);margin-top:6px;font-family:'DM Mono',monospace;font-weight:300;line-height:1.8"></div>
       </div>
 
       <div class="field">
@@ -406,6 +479,7 @@
       selectedColor = e.target.value; updateSwatchSelection();
     });
     autoFilename();
+    renderRules();
     if (getToken()) { showTokenStatus(); loadAll(); }
   });
 
@@ -495,27 +569,122 @@
       `${document.getElementById('html-input').value.length.toLocaleString()} chars`;
   }
 
-  // ── HTML 정제 ─────────────────────────────────────────────────
+  // ── 정제 규칙 관리 ──────────────────────────────────────────────
+  const RULES_KEY = 'sanitize_rules';
+  const DEFAULT_RULES = [
+    { id: 'lbdata', name: 'LBDATA 블록', pattern: '\\[LBDATA START\\][\\s\\S]*?\\[LBDATA END\\]', replacement: '', enabled: true }
+  ];
+
+  function getRules() {
+    try {
+      const saved = localStorage.getItem(RULES_KEY);
+      return saved ? JSON.parse(saved) : DEFAULT_RULES;
+    } catch { return DEFAULT_RULES; }
+  }
+  function saveRules(rules) {
+    localStorage.setItem(RULES_KEY, JSON.stringify(rules));
+  }
+
+  function renderRules() {
+    const rules = getRules();
+    const list  = document.getElementById('rules-list');
+    if (!rules.length) {
+      list.innerHTML = `<p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-soft);font-weight:300;padding:4px 0">규칙이 없어요. 아래에서 추가해보세요.</p>`;
+      return;
+    }
+    list.innerHTML = rules.map((r, i) => {
+      const outLabel = r.replacement
+        ? `<span style="color:var(--green);margin-left:4px">→ "${r.replacement}"</span>`
+        : `<span style="color:var(--text-soft);margin-left:4px">→ 삭제</span>`;
+      return `
+        <div class="rule-item ${r.enabled ? '' : 'disabled'}">
+          <button class="rule-toggle ${r.enabled ? 'on' : 'off'}" onclick="toggleRule(${i})" title="${r.enabled ? '비활성화' : '활성화'}"></button>
+          <span class="rule-name">${r.name}</span>
+          <span class="rule-pattern" title="In: ${r.pattern}">
+            <span style="color:var(--accent);opacity:.7">in</span> ${r.pattern}${outLabel}
+          </span>
+          <button class="btn-danger btn-small" onclick="deleteRule(${i})" style="flex-shrink:0;padding:3px 9px">✕</button>
+        </div>`;
+    }).join('');
+  }
+
+  function toggleRule(i) {
+    const rules = getRules();
+    rules[i].enabled = !rules[i].enabled;
+    saveRules(rules); renderRules();
+  }
+
+  function deleteRule(i) {
+    const rules = getRules();
+    rules.splice(i, 1);
+    saveRules(rules); renderRules();
+  }
+
+  let addFormOpen = false;
+  function toggleAddForm() {
+    addFormOpen = !addFormOpen;
+    document.getElementById('rule-add-form').classList.toggle('visible', addFormOpen);
+    if (addFormOpen) {
+      document.getElementById('new-rule-name').focus();
+      document.getElementById('rule-pattern-error').style.display = 'none';
+    } else {
+      document.getElementById('new-rule-name').value = '';
+      document.getElementById('new-rule-pattern').value = '';
+      document.getElementById('new-rule-replacement').value = '';
+    }
+  }
+
+  function saveNewRule() {
+    const name        = document.getElementById('new-rule-name').value.trim();
+    const pattern     = document.getElementById('new-rule-pattern').value.trim();
+    const replacement = document.getElementById('new-rule-replacement').value; // 빈 문자열도 허용
+    const errEl       = document.getElementById('rule-pattern-error');
+
+    if (!name)    { errEl.textContent = '이름을 입력해주세요.'; errEl.style.display = 'block'; return; }
+    if (!pattern) { errEl.textContent = 'In 패턴을 입력해주세요.'; errEl.style.display = 'block'; return; }
+    try { new RegExp(pattern, 'g'); }
+    catch(e) { errEl.textContent = `정규식 오류: ${e.message}`; errEl.style.display = 'block'; return; }
+
+    const rules = getRules();
+    rules.push({ id: `rule_${Date.now()}`, name, pattern, replacement, enabled: true });
+    saveRules(rules);
+    renderRules();
+    toggleAddForm();
+  }
+
   function sanitizeHtml() {
     const ta     = document.getElementById('html-input');
     const result = document.getElementById('sanitize-result');
     const before = ta.value;
     if (!before.trim()) { result.style.display = 'none'; return; }
 
-    let text = before, removed = [];
-    const lbCount = (text.match(/\[LBDATA START\][\s\S]*?\[LBDATA END\]/g) || []).length;
-    if (lbCount > 0) {
-      text = text.replace(/\[LBDATA START\][\s\S]*?\[LBDATA END\]/g, '');
-      removed.push(`LBDATA 블록 ${lbCount}개`);
-    }
+    const rules   = getRules().filter(r => r.enabled);
+    let text      = before;
+    const log     = [];
+
+    rules.forEach(r => {
+      try {
+        const re    = new RegExp(r.pattern, 'gs');
+        const count = (text.match(re) || []).length;
+        if (count > 0) {
+          text = text.replace(re, r.replacement || '');
+          const action = r.replacement ? `"${r.replacement}"로 치환` : '삭제';
+          log.push(`${r.name} ${count}개 ${action}`);
+        }
+      } catch { /* 잘못된 패턴 건너뜀 */ }
+    });
+
     text = text.replace(/\n{3,}/g, '\n\n').trim();
     ta.value = text;
     updateCharCount();
 
-    result.style.color = removed.length ? 'var(--green)' : 'var(--text-soft)';
-    result.textContent = removed.length
-      ? `✓ 제거됨: ${removed.join(' · ')}`
-      : '정제할 항목이 없어요.';
+    if (log.length) {
+      result.style.color = 'var(--green)';
+      result.innerHTML = `✓ 처리 완료:<br>${log.map(l => `&nbsp;&nbsp;· ${l}`).join('<br>')}`;
+    } else {
+      result.style.color = 'var(--text-soft)';
+      result.textContent = '활성화된 규칙에 해당하는 항목이 없어요.';
+    }
     result.style.display = 'block';
   }
   // ─────────────────────────────────────────────────────────────
