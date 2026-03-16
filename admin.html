@@ -340,10 +340,17 @@
 
       <div class="field">
         <div class="field-label">캐릭터</div>
-        <select id="char-select" onchange="onCharChange()">
-          <option value="">-- 선택하세요 --</option>
-          <option value="__new__">+ 새 캐릭터 추가</option>
-        </select>
+        <div style="display:flex;gap:8px">
+          <select id="char-select" onchange="onCharChange()" style="flex:1;border-radius:8px 0 0 8px">
+            <option value="">-- 선택하세요 --</option>
+            <option value="__new__">+ 새 캐릭터 추가</option>
+          </select>
+          <button class="btn-danger btn-small" id="delete-char-btn"
+            onclick="deleteCharacter()"
+            style="border-radius:0 8px 8px 0;display:none;white-space:nowrap;padding:0 14px">
+            캐릭터 삭제
+          </button>
+        </div>
       </div>
 
       <div id="new-char-fields" class="glass-panel">
@@ -550,7 +557,7 @@
       });
       if (res.ok) {
         const file = await res.json();
-        currentData = JSON.parse(atob(file.content.replace(/\n/g,'')));
+        currentData = JSON.parse(decodeURIComponent(escape(atob(file.content.replace(/\n/g,'')))));
         if (!currentData.characters) currentData.characters = [];
       } else { currentData = { characters: [] }; }
     } catch(e) { currentData = { characters: [] }; }
@@ -567,9 +574,40 @@
   }
 
   function onCharChange() {
-    document.getElementById('new-char-fields').classList.toggle(
-      'visible', document.getElementById('char-select').value === '__new__'
-    );
+    const val = document.getElementById('char-select').value;
+    document.getElementById('new-char-fields').classList.toggle('visible', val === '__new__');
+    // 기존 캐릭터 선택 시에만 삭제 버튼 표시
+    document.getElementById('delete-char-btn').style.display =
+      (val && val !== '__new__') ? 'block' : 'none';
+  }
+
+  async function deleteCharacter() {
+    const val  = document.getElementById('char-select').value;
+    if (!val || val === '__new__') return;
+    const char = currentData.characters.find(c => c.id === val);
+    if (!char) return;
+
+    const logCount = (char.logs || []).length;
+    const msg = logCount > 0
+      ? `"${char.name}" 캐릭터를 삭제할까요?\n연결된 로그 ${logCount}개는 data.json에서만 제거되고 파일은 남아요.`
+      : `"${char.name}" 캐릭터를 삭제할까요?`;
+    if (!confirm(msg)) return;
+
+    setStatus('loading', '<span class="spinner"></span>캐릭터 삭제 중...');
+
+    try {
+      await loadDataJson(); // 최신 SHA 확보
+      currentData.characters = currentData.characters.filter(c => c.id !== val);
+      const dataSha = await getFileSha('data.json');
+      await putFile('data.json', JSON.stringify(currentData, null, 2), `Delete character: ${char.name}`, dataSha);
+
+      setStatus('success', `✓ "${char.name}" 캐릭터가 삭제됐어요.`);
+      document.getElementById('delete-char-btn').style.display = 'none';
+      populateCharSelect();
+      await renderFileList();
+    } catch(e) {
+      setStatus('error', `삭제 실패: ${e.message}`);
+    }
   }
 
   function autoFilename() {
