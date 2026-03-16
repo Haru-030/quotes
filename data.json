@@ -3,14 +3,20 @@
     {
       "id": "neo-seoul",
       "name": "The Chronicles of Neo-Seoul",
-      "desc": "네오서울",
+      "desc": "ë¤ì¤ìì¸",
       "color": "#3d6b8e",
       "logs": [
         {
           "filename": "a-01.html",
           "title": "ChaeMin",
-          "meta": "채민 · 1화",
+          "meta": "ì±ë¯¼ Â· 1í",
           "date": "2026-02-20"
+        },
+        {
+          "filename": "log-20260316-1427.html",
+          "title": "Unknown",
+          "meta": "",
+          "date": "2026-03-16"
         }
       ]
     }
