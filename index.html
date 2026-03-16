@@ -197,9 +197,28 @@
       border-top: 1px solid var(--border);
       display: flex;
       justify-content: space-between;
+      align-items: center;
       font-size: 0.7rem;
       color: var(--ink-soft);
       letter-spacing: 0.08em;
+    }
+
+    .admin-link {
+      text-decoration: none;
+      color: var(--ink-soft);
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .admin-link:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(61, 107, 142, 0.05);
     }
   </style>
 </head>
@@ -274,6 +293,7 @@
   <footer>
     <span>글자를 모으는 공간 · 나만의 서재</span>
     <span>✦</span>
+    <a class="admin-link" href="admin.html">+ 로그 추가</a>
   </footer>
 </body>
 </html>
