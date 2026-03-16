@@ -67,6 +67,22 @@
     .btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
     .btn-small { padding: 8px 14px; font-size: 10px; }
 
+    /* ── 삭제 버튼 ── */
+    .btn-danger {
+      background: transparent;
+      color: var(--red);
+      border: 1px solid rgba(224,92,92,0.3);
+      font-size: 9px;
+      padding: 4px 10px;
+      letter-spacing: 1px;
+    }
+    .btn-danger:hover {
+      background: rgba(224,92,92,0.1);
+      border-color: var(--red);
+      color: var(--red);
+    }
+    .btn-danger:disabled { opacity: 0.4; cursor: not-allowed; }
+
     #preview-wrap { display: none; margin-top: 8px; }
     #preview-wrap.visible { display: block; }
     #preview-frame { width: 100%; height: 400px; border: 1px solid var(--border); background: #fff; }
@@ -329,6 +345,59 @@
     return res.json();
   }
 
+  // ── 파일 삭제 (GitHub API) ──────────────────────────────────────
+  async function deleteFile(path, sha, message) {
+    const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${path}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        Accept: 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message, sha })
+    });
+    if (!res.ok) { const e = await res.json(); throw new Error(e.message || `HTTP ${res.status}`); }
+  }
+
+  // ── 로그 삭제 메인 함수 ─────────────────────────────────────────
+  async function deleteLog(filename) {
+    if (!confirm(`"${filename}" 을 삭제할까요?\n이 작업은 되돌릴 수 없어요.`)) return;
+
+    // 해당 버튼 비활성화
+    const btn = document.querySelector(`[data-delete="${filename}"]`);
+    if (btn) { btn.disabled = true; btn.textContent = '삭제 중...'; }
+
+    setStatus('loading', '<span class="spinner"></span>(1/2) 파일 삭제 중...');
+
+    try {
+      // 1) quotes/파일.html 삭제
+      const logPath = `${FOLDER}/${filename}`;
+      const fileSha = await getFileSha(logPath);
+      if (!fileSha) throw new Error(`파일을 찾을 수 없어요: ${logPath}`);
+      await deleteFile(logPath, fileSha, `Delete log: ${filename}`);
+
+      setStatus('loading', '<span class="spinner"></span>(2/2) data.json 업데이트 중...');
+
+      // 2) data.json에서 해당 로그 항목 제거
+      await loadDataJson(); // 최신 SHA 확보를 위해 재로드
+      currentData.characters.forEach(c => {
+        c.logs = (c.logs || []).filter(l => l.filename !== filename);
+      });
+
+      const dataSha = await getFileSha('data.json');
+      await putFile('data.json', JSON.stringify(currentData, null, 2), `Remove log from index: ${filename}`, dataSha);
+
+      setStatus('success', `✓ "${filename}" 삭제 완료!`);
+      populateCharSelect();
+      await renderFileList();
+
+    } catch(e) {
+      setStatus('error', `삭제 실패: ${e.message}`);
+      if (btn) { btn.disabled = false; btn.textContent = '삭제'; }
+    }
+  }
+  // ───────────────────────────────────────────────────────────────
+
   async function saveAll() {
     if (!getToken()) { setStatus('error', '먼저 GitHub Token을 설정해주세요.'); return; }
     const charVal = document.getElementById('char-select').value;
@@ -416,6 +485,7 @@
           <a class="file-name" href="${f.html_url}" target="_blank">${f.name}</a>
           <div class="file-actions">
             <button class="btn-secondary copy-btn" onclick="copyUrl('${pageUrl}')">URL 복사</button>
+            <button class="btn-danger btn-small" data-delete="${f.name}" onclick="deleteLog('${f.name}')">삭제</button>
           </div>
         </div>`;
       }).join('');
